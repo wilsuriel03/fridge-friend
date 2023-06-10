@@ -6,9 +6,13 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "dbpush": "dotenv -e .env.local -- npx prisma db push",
+    "migrate": "dotenv -e .env.local -- npx prisma migrate",
+    "generate": "dotenv -e .env.local -- npx prisma generate"
   },
   "dependencies": {
+    "@prisma/client": "^4.15.0",
     "@types/node": "20.2.1",
     "@types/react": "18.2.6",
     "@types/react-dom": "18.2.4",
