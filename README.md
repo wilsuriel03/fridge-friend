@@ -1,34 +1,43 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# FridgeFriend
+
+FridgeFriend is a Progressive Web App designed to connect individuals and communities with local fridges and pantries. The app provides a platform for users to locate, manage, and communicate with fridges and pantries in their area, as well as contribute to and engage with their local community. The Twilio API is integrated to facilitate real-time communication between users and pantry organizers.
+
+## Description
+
+The main features of FridgeFriend include:
+
+- Interactive map for locating nearby fridges and pantries
+- Real-time inventory management
+- SMS notifications and alerts using the Twilio API
+- Support Ticketing System
+
 
 ## Getting Started
 
-First, run the development server:
+To get started with FridgeFriend, follow these steps:
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-```
+1. Clone the repository to your local machine:
+https://github.com/The-Merge-Sorts/FridgeFriend.git
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Change to the project directory:
+```cd FridgeFriend```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. Run the commands
+   ```
+   npm i
+   npm run dev
+   ```
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+## Technologies
 
-## Learn More
+### Client
+- Next.js
+- React
+- Mapbox
+- Auth0
+- React Hook Form
+- Tailwind CSS
 
-To learn more about Next.js, take a look at the following resources:
+### Contribution
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+[Join The Discord Server <img align='center' src='https://clipartcraft.com/images/discord-logo-transparent-better.png' width='30px'>](https://discord.gg/7hdFGaYB)
