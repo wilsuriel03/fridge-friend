@@ -17,8 +17,7 @@ model User {
   phoneNumber    String?             @unique
   openedTickets  Ticket[]            @relation("openedBy")
   claimedTickets Ticket[]            @relation("claimedBy")
-  tickets        Ticket[]
-  fridges        Fridge[]
+  closedTickets  Ticket[]            @relation("closedBy")
   subscriptions  Subscription[]
   profileImages  UserProfileImages[]
   images         Image[]             @relation("userImages")
@@ -26,10 +25,8 @@ model User {
 
 model Fridge {
   id            String         @id @default(cuid())
-  tickets       Ticket[]
-  users         User[]
-  status        Boolean        @default(true)
-  openTickets   Boolean        @default(false)
+  tickets       Ticket[]  // This is All tickets for the fridge (past and present, closed or open)
+  status        Boolean        @default(true) // This is whether or not the fridge is active and running
   subscriptions Subscription[]
   latitude      Float
   longitude     Float
@@ -46,7 +43,7 @@ model Ticket {
   openedBy    User        @relation(name: "openedBy", fields: [openedById], references: [id])
   openedById  String
   claimedBy   User[]      @relation("claimedBy")
-  closedBy    User?       @relation(fields: [closedById], references: [id])
+  closedBy    User?       @relation(name: "closedBy", fields: [closedById], references: [id])
   closedById  String
   isOpen      Boolean     @default(true)
   fridge      Fridge      @relation(fields: [fridgeId], references: [id])
@@ -68,25 +65,27 @@ model Subscription {
 }
 
 model Image {
-  id        String    @id @default(cuid())
-  url       String
-  caption   String?
-  addedBy   User      @relation("userImages", fields: [addedById], references: [id])
-  addedById String    @unique
-  type      imageType
+  id                String              @id @default(cuid())
+  url               String
+  caption           String?
+  addedBy           User                @relation("userImages", fields: [addedById], references: [id])
+  addedById         String              @unique
+  type              imageType
   userProfileImages UserProfileImages[]
-  fridgeImages FridgeImages[]
+  fridgeImages      FridgeImages[]
 }
 
+// This is a join Table of User and Images
 model UserProfileImages {
   id        String  @id @default(cuid())
   user      User    @relation(fields: [userId], references: [id])
   userId    String
   image     Image   @relation(fields: [imageId], references: [id])
   imageId   String
-  isCurrent Boolean @default(false)
+  isCurrent Boolean @default(false) // This is whether the image is the user's current profile image
 }
 
+// Join Table of Fridges and Images
 model FridgeImages {
   id        String          @id @default(cuid())
   fridge    Fridge          @relation(fields: [fridgeId], references: [id])
@@ -94,7 +93,7 @@ model FridgeImages {
   image     Image           @relation(fields: [imageId], references: [id])
   imageId   String
   type      FridgeImageType @default(OTHER)
-  isCurrent Boolean         @default(false)
+  isCurrent Boolean         @default(false) // whether the image is the "profile" image for the fridge
 }
 
 enum serviceType {
