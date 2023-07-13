@@ -11,21 +11,26 @@ datasource db {
 }
 
 model User {
-  id             String              @id @default(cuid())
-  name           String?
-  email          String?             @unique
-  phoneNumber    String?             @unique
-  openedTickets  Ticket[]            @relation("openedBy")
-  claimedTickets Ticket[]            @relation("claimedBy")
-  closedTickets  Ticket[]            @relation("closedBy")
-  subscriptions  Subscription[]
-  profileImages  UserProfileImages[]
-  images         Image[]             @relation("userImages")
+  id                    String              @id @default(cuid())
+  name                  String?
+  email                 String?             @unique
+  phoneNumber           String?             @unique
+  openedTickets         Ticket[]            @relation("openedBy")
+  claimedTickets        Ticket[]            @relation("claimedBy")
+  closedTickets         Ticket[]            @relation("closedBy")
+  subscriptions         Subscription[]
+  profileImages         UserProfileImages[] @relation("profileImages")
+  currentProfileImage   UserProfileImages?  @relation("currentProfileImage", fields: [currentProfileImageId], references: [id])
+  currentProfileImageId String?             @unique
+  images                Image[]             @relation("userImages")
+  // "image" represents current
+  Image                 Image?              @relation(fields: [imageId], references: [id])
+  imageId               String?
 }
 
 model Fridge {
   id            String         @id @default(cuid())
-  tickets       Ticket[]  // This is All tickets for the fridge (past and present, closed or open)
+  tickets       Ticket[] // This is All tickets for the fridge (past and present, closed or open)
   status        Boolean        @default(true) // This is whether or not the fridge is active and running
   subscriptions Subscription[]
   latitude      Float
@@ -73,16 +78,19 @@ model Image {
   type              imageType
   userProfileImages UserProfileImages[]
   fridgeImages      FridgeImages[]
+  User              User[]
 }
 
 // This is a join Table of User and Images
 model UserProfileImages {
-  id        String  @id @default(cuid())
-  user      User    @relation(fields: [userId], references: [id])
-  userId    String
-  image     Image   @relation(fields: [imageId], references: [id])
-  imageId   String
-  isCurrent Boolean @default(false) // This is whether the image is the user's current profile image
+  id     String @id @default(cuid())
+  user   User   @relation("profileImages", fields: [userId], references: [id])
+  userId String
+
+  image       Image  @relation(fields: [imageId], references: [id])
+  imageId     String
+  // isCurrent Boolean @default(false) // This is whether the image is the user's current profile image
+  userProfile User?  @relation("currentProfileImage")
 }
 
 // Join Table of Fridges and Images
