@@ -29,17 +29,20 @@ model User {
 }
 
 model Fridge {
-  id            String         @id @default(cuid())
-  tickets       Ticket[] // This is All tickets for the fridge (past and present, closed or open)
-  status        Boolean        @default(true) // This is whether or not the fridge is active and running
-  subscriptions Subscription[]
-  latitude      Float
-  longitude     Float
-  streetAddress String
-  zipCode       Int
-  neighborhood  String?
-  fridgeImages  FridgeImages[]
-  mainImageId   String?
+  id                   String         @id @default(cuid())
+  tickets              Ticket[] // This is All tickets for the fridge (past and present, closed or open)
+  status               Boolean        @default(true) // This is whether or not the fridge is active and running
+  subscriptions        Subscription[]
+  latitude             Float
+  longitude            Float
+  streetAddress        String
+  zipCode              Int
+  neighborhood         String?
+  fridgeImages         FridgeImages[]
+  fridgeProfileImage   FridgeImages?  @relation("fridgeProfileImage", fields: [fridgeProfileImageId], references: [id])
+  fridgeProfileImageId String?        @unique
+  comments             Comment[]      @relation("commentFridge")
+  description          String?
 }
 
 model Ticket {
@@ -53,6 +56,9 @@ model Ticket {
   isOpen      Boolean     @default(true)
   fridge      Fridge      @relation(fields: [fridgeId], references: [id])
   fridgeId    String
+  description String
+  comments    Comment[]   @relation("commentTicket")
+  images      Image[]
 }
 
 model Subscription {
@@ -64,7 +70,8 @@ model Subscription {
   foodAdded      Boolean @default(false)
   maintenance    Boolean @default(false)
   cleaning       Boolean @default(false)
-  foodAction     Boolean @default(false)
+  // maybe foodaction should be included in miscellaneous
+  // foodAction     Boolean @default(false)
   transportation Boolean @default(false)
   misc           Boolean @default(false)
 }
@@ -79,9 +86,10 @@ model Image {
   userProfileImages UserProfileImages[]
   fridgeImages      FridgeImages[]
   User              User[]
+  ticket            Ticket?             @relation(fields: [ticketId], references: [id])
+  ticketId          String?
 }
 
-// This is a join Table of User and Images
 model UserProfileImages {
   id     String @id @default(cuid())
   user   User   @relation("profileImages", fields: [userId], references: [id])
@@ -89,23 +97,33 @@ model UserProfileImages {
 
   image       Image  @relation(fields: [imageId], references: [id])
   imageId     String
-  // isCurrent Boolean @default(false) // This is whether the image is the user's current profile image
   userProfile User?  @relation("currentProfileImage")
 }
 
-// Join Table of Fridges and Images
 model FridgeImages {
-  id        String          @id @default(cuid())
-  fridge    Fridge          @relation(fields: [fridgeId], references: [id])
-  fridgeId  String
-  image     Image           @relation(fields: [imageId], references: [id])
-  imageId   String
-  type      FridgeImageType @default(OTHER)
-  isCurrent Boolean         @default(false) // whether the image is the "profile" image for the fridge
+  id       String          @id @default(cuid())
+  fridge   Fridge          @relation(fields: [fridgeId], references: [id])
+  fridgeId String
+  image    Image           @relation(fields: [imageId], references: [id])
+  imageId  String
+  type     FridgeImageType @default(OTHER)
+
+  fridgeProfile Fridge? @relation("fridgeProfileImage")
+}
+
+model Comment {
+  id       String      @id @default(cuid())
+  type     commentType
+  text     String
+  ticket   Ticket?     @relation("commentTicket", fields: [ticketId], references: [id])
+  ticketId String?
+  fridge   Fridge?     @relation("commentFridge", fields: [fridgeId], references: [id])
+  fridgeId String?
 }
 
 enum serviceType {
-  FOODACTION
+  // maybe the FOODACTION is part of MISC
+  //FOODACTION
   MAINTENANCE
   CLEANING
   TRANSPORTATION
@@ -121,5 +139,11 @@ enum imageType {
 enum FridgeImageType {
   INSIDE
   OUTSIDE
+  ISSUE
   OTHER
+}
+
+enum commentType {
+  TICKET
+  FRIDGE
 }
