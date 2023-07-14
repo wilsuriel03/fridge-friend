@@ -11,6 +11,18 @@ The main features of FridgeFriend include:
 - SMS notifications and alerts using the Twilio API
 - Support Ticketing System
 
+## Muy Importante!!!
+Next.js uses the .env.local file to store environment variables, but the Prisma ORM cannot read from that file, so you must use the dotenv-cli to run Prisma cli commands.
+
+Prefix every Prisma cli command with ```dotenv -e .env.local -- ```
+
+For example, in order to generate the Prisma client, which would normally be ```npx prisma generate```, you would instead run the following command:
+
+```bash
+dotenv -e .env.local -- npx prisma generate
+```
+
+I have added some scripts to the package.json for some of the most common commands to make this easier. In this case, you can simply run ```npm run generate``` to generate the client
 
 ## Getting Started
 
