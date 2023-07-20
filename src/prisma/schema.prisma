@@ -1,6 +1,5 @@
 generator client {
   provider        = "prisma-client-js"
-  previewFeatures = ["jsonProtocol"]
 }
 
 datasource db {
@@ -19,30 +18,75 @@ model User {
   claimedTickets        Ticket[]            @relation("claimedBy")
   closedTickets         Ticket[]            @relation("closedBy")
   subscriptions         Subscription[]
-  profileImages         UserProfileImages[] @relation("profileImages")
-  currentProfileImage   UserProfileImages?  @relation("currentProfileImage", fields: [currentProfileImageId], references: [id])
+  profileImages         UserProfileImage[]  
+  currentProfileImage   UserProfileImage?   @relation("CurrentProfileImage", fields: [currentProfileImageId], references: [id])
   currentProfileImageId String?             @unique
-  images                Image[]             @relation("userImages")
-  // "image" represents current
-  Image                 Image?              @relation(fields: [imageId], references: [id])
-  imageId               String?
+  userImages            Image[]             
+  comments              Comment[]           @relation("commentUser")
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+  accounts              Account[]
+  sessions              Session[]
+  verificationTokens    VerificationToken[]
+}
+
+model Account {
+  id                String
+  compoundId        String   @unique @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refreshToken      String? 
+  accessToken       String? 
+  expiresAt         Int?
+  tokenType         String?
+  scope             String?
+  idToken           String? 
+  sessionState      String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @default(now())
+  user              User     @relation(fields: [userId], references: [id])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id])
+}
+
+model VerificationToken {
+  id          String   @id @default(cuid())
+  identifier  String
+  token       String   @unique
+  expires     DateTime
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
 }
 
 model Fridge {
   id                   String         @id @default(cuid())
-  tickets              Ticket[] // This is All tickets for the fridge (past and present, closed or open)
-  status               Boolean        @default(true) // This is whether or not the fridge is active and running
+  tickets              Ticket[]
+  isActive             Boolean        @default(true)
   subscriptions        Subscription[]
   latitude             Float
   longitude            Float
   streetAddress        String
   zipCode              Int
   neighborhood         String?
-  fridgeImages         FridgeImages[]
-  fridgeProfileImage   FridgeImages?  @relation("fridgeProfileImage", fields: [fridgeProfileImageId], references: [id])
+  fridgeImages         FridgeImage[]  
+  fridgeProfileImage   FridgeImage?  @relation("FridgeProfileImage", fields: [fridgeProfileImageId], references: [id])
   fridgeProfileImageId String?        @unique
   comments             Comment[]      @relation("commentFridge")
   description          String?
+  inventoryItems       InventoryItem[]
+  status               FridgeStatus   @default(GREEN)
+  createdAt            DateTime       @default(now())
+  updatedAt            DateTime       @updatedAt
 }
 
 model Ticket {
@@ -59,71 +103,90 @@ model Ticket {
   description String
   comments    Comment[]   @relation("commentTicket")
   images      Image[]
+  status      TicketStatus @default(OPEN)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
 }
 
 model Subscription {
-  id             String  @id @default(cuid())
-  user           User    @relation(fields: [userId], references: [id])
-  userId         String
-  fridge         Fridge  @relation(fields: [fridgeId], references: [id])
-  fridgeId       String
-  foodAdded      Boolean @default(false)
-  maintenance    Boolean @default(false)
-  cleaning       Boolean @default(false)
-  // maybe foodaction should be included in miscellaneous
-  // foodAction     Boolean @default(false)
-  transportation Boolean @default(false)
-  misc           Boolean @default(false)
+  id                  String  @id @default(cuid())
+  user                User    @relation(fields: [userId], references: [id])
+  userId              String
+  fridge              Fridge  @relation(fields: [fridgeId], references: [id])
+  fridgeId            String
+  notifyWhenFoodAdded Boolean @default(false)
+  notifyMaintenance   Boolean @default(false)
+  notifyCleaning      Boolean @default(false)
+  notifyTransportation Boolean @default(false)
+  notifyOthers        Boolean @default(false)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
 }
 
 model Image {
   id                String              @id @default(cuid())
   url               String
   caption           String?
-  addedBy           User                @relation("userImages", fields: [addedById], references: [id])
-  addedById         String              @unique
+  addedBy           User                @relation(fields: [addedById], references: [id])
+  addedById         String
   type              imageType
-  userProfileImages UserProfileImages[]
-  fridgeImages      FridgeImages[]
-  User              User[]
+  userProfileImages UserProfileImage[]  @relation("imageUserProfileImages")
+  fridgeImages      FridgeImage[]       @relation("imageFridgeImages")
   ticket            Ticket?             @relation(fields: [ticketId], references: [id])
   ticketId          String?
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
 }
 
-model UserProfileImages {
+model UserProfileImage {
   id     String @id @default(cuid())
-  user   User   @relation("profileImages", fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
   userId String
-
-  image       Image  @relation(fields: [imageId], references: [id])
-  imageId     String
-  userProfile User?  @relation("currentProfileImage")
+  image  Image  @relation("imageUserProfileImages", fields: [imageId], references: [id])
+  imageId String
+  userCurrentProfileImage User? @relation("CurrentProfileImage")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
-model FridgeImages {
+model FridgeImage {
   id       String          @id @default(cuid())
   fridge   Fridge          @relation(fields: [fridgeId], references: [id])
   fridgeId String
-  image    Image           @relation(fields: [imageId], references: [id])
+  image    Image           @relation("imageFridgeImages", fields: [imageId], references: [id])
   imageId  String
   type     FridgeImageType @default(OTHER)
+  fridgeProfileImage Fridge? @relation("FridgeProfileImage")
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+}
 
-  fridgeProfile Fridge? @relation("fridgeProfileImage")
+model InventoryItem {
+  id        String   @id @default(cuid())
+  fridge    Fridge   @relation(fields: [fridgeId], references: [id])
+  fridgeId  String
+  foodItem  String
+  quantity  Int
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Comment {
-  id       String      @id @default(cuid())
-  type     commentType
-  text     String
-  ticket   Ticket?     @relation("commentTicket", fields: [ticketId], references: [id])
-  ticketId String?
-  fridge   Fridge?     @relation("commentFridge", fields: [fridgeId], references: [id])
-  fridgeId String?
+  id        String      @id @default(cuid())
+  user      User        @relation("commentUser", fields: [userId], references: [id])
+  userId    String
+  ticket    Ticket?     @relation("commentTicket", fields: [ticketId], references: [id])
+  ticketId  String?
+  fridge    Fridge?     @relation("commentFridge", fields: [fridgeId], references: [id])
+  fridgeId  String?
+  text      String
+  type      commentType
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
 }
 
 enum serviceType {
-  // maybe the FOODACTION is part of MISC
-  //FOODACTION
   MAINTENANCE
   CLEANING
   TRANSPORTATION
@@ -146,4 +209,15 @@ enum FridgeImageType {
 enum commentType {
   TICKET
   FRIDGE
+}
+
+enum FridgeStatus {
+  GREEN
+  YELLOW
+  RED
+}
+
+enum TicketStatus {
+  OPEN
+  CLOSED
 }
