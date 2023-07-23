@@ -6,7 +6,7 @@ const navigation = {
       href: { pathname: "/community-board" },
     },
     { name: "FAQs", href: { pathname: "/FAQs" } },
-    { name: "Notification", href: { pathname: "/notifications" } },
+    { name: "Notifications", href: { pathname: "/notifications" } },
   ],
   social: [
     {
