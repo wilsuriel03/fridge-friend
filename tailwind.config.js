@@ -9,12 +9,15 @@ module.exports = {
     extend: {
       colors: {
         'primary': '#00050B', // black
-        'primary-ligh': '#6F9D80', // light green
+        'primary-light': '#6F9D80', // light green
         'primary-dark': '#0B704E', // dark green
         'secondary': '#FB7712', // orange
         'secondary-light': '#FB8B01', // light orange
         'secondary-dark': '#F34509', // dark orange
         'light-text': '#9A9EA6', // light grey
+      },
+      gridTemplateRows: {
+        'footer': '50px minmax(144px, 1fr) auto',
       },
     },
   },
